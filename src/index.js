@@ -4,10 +4,15 @@ import './index.css';
 import App from './App';
 import "bootstrap/dist/css/bootstrap.min.css";
 import {AuthProvider}  from './contexts/AuthContext';
+import { BrowserRouter, Route, Router } from 'react-router-dom';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(
+root.render(<BrowserRouter>
     <AuthProvider>
-    <App />
+        <Router>
+            <Route path="/" component={App} />
+            
+        </Router>    
     </AuthProvider>
+    </BrowserRouter>
 );
