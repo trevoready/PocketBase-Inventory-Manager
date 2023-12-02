@@ -18,6 +18,22 @@ export function AuthProvider({ children }) {
     return client.authStore.clear();
   }
 
+  //once login is successful, refresh the user object
+  useEffect(() => {
+    if (client.authStore.model) {
+      client.collection("users").authRefresh().then((user) => {
+        setCurrentUser(user);
+      }).catch((err) => {
+        console.log(err);
+
+        if (err.status === 401) {
+          client.authStore.clear();
+        }
+      });
+    }
+  }, []);
+
+
   useEffect(() => {
     const unsubscribe = client.authStore.onChange(user => {
       console.log(client.authStore.model);
