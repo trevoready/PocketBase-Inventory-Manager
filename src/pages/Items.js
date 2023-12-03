@@ -1,7 +1,11 @@
 import React from 'react'
 import { useEffect } from 'react';
 import client from '../pbconn';
-import { Table } from 'react-bootstrap';
+import { Image, Table } from 'react-bootstrap';
+import AddItemModal from '../modals/AddItemModal';
+import DeleteButton from '../components/DeleteButton';
+import "../App.css"
+import ImageDisplay from '../components/ImageDisplay';
 
 
 export default function Items() {
@@ -14,7 +18,9 @@ export default function Items() {
 
     useEffect(() => {
         setLoading(true);
-        client.collection("items").getList(page,perPage).then((items) => {
+        client.collection("items").getList(page,perPage, {
+            expand: "category"
+        }).then((items) => {
             setItems(items.items);
             setTotalPages(items.totalPages);
             console.log(items);
@@ -25,6 +31,17 @@ export default function Items() {
             setLoading(false);
         });
     }, [page, perPage]);
+
+    const deleteItem = (id) => {
+        console.log(id);
+        client.collection("items").delete(id).then((res) => {
+            console.log(res);
+            setItems(items.filter((item) => item.id !== id));
+        }).catch((err) => {
+            console.log(err);
+        });
+    }
+
   return (
     <div className='d-flex flex-column'>
         <div className='d-flex flex-row'>
@@ -37,7 +54,7 @@ export default function Items() {
                 <option value='50'>50</option>
                 <option value='100'>100</option>
             </select>
-            
+            <AddItemModal />
         </div>
         <Table striped bordered hover className='mt-3'>
             <thead>
@@ -46,6 +63,8 @@ export default function Items() {
                     <th>Name</th>
                     <th>Serial Number</th>
                     <th>Category</th>
+                    <th>Image</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -55,7 +74,11 @@ export default function Items() {
                             <td>{item.id}</td>
                             <td>{item.name}</td>
                             <td>{item.serial_number}</td>
-                            <td>{item.category}</td>
+                            <td>{item.category ? item.expand.category.name : "None"}</td>
+                            <td>{item.image.length === 1 ? <ImageDisplay item={item}/> : "No Image"}</td>
+                            <td>
+                                <DeleteButton onDelete={() => deleteItem(item.id)}/>
+                            </td>
                         </tr>
                     )
                 })}
